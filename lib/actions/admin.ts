@@ -32,7 +32,7 @@ interface UserData {
 
 /**
  * Ensures a company exists and returns its ID.
- * Explicitly typing the supabase client here prevents 'never' errors.
+ * Casts the table reference to bypass 'never' inference.
  */
 async function resolveCompanyId(
   supabase: SupabaseClient<Database>, 
@@ -41,8 +41,8 @@ async function resolveCompanyId(
   if (companyData.id) return companyData.id;
 
   if (companyData.name) {
-    const { data, error } = await supabase
-      .from("companies")
+    // FIX: Cast .from() as any to allow .upsert()
+    const { data, error } = await (supabase.from("companies") as any)
       .upsert(
         { name: companyData.name.trim() }, 
         { onConflict: "name" }
@@ -52,7 +52,6 @@ async function resolveCompanyId(
 
     if (error) throw new Error(`Company Resolution Error: ${error.message}`);
     
-    // Double cast to handle the .single() inference bug
     const resolved = data as unknown as { id: string };
     return resolved.id;
   }
@@ -65,7 +64,6 @@ async function resolveCompanyId(
 export async function createNewUser(
   data: UserData & { email: string; password: string },
 ) {
-  // THE FIX: Explicitly cast the admin client to SupabaseClient<Database>
   const supabase = (await createAdminClient()) as SupabaseClient<Database>;
   
   try {
@@ -93,9 +91,8 @@ export async function createNewUser(
       company_id: resolvedCompanyId,
     };
 
-    // Because 'supabase' is now typed, .update() will not expect 'never'
-    const { error: profileError } = await supabase
-      .from("profiles")
+    // FIX: Cast .from() as any to allow .update()
+    const { error: profileError } = await (supabase.from("profiles") as any)
       .update(profileUpdate)
       .eq("id", userId);
 
@@ -109,8 +106,8 @@ export async function createNewUser(
         is_primary: alias.is_primary,
       }));
 
-      const { error: aliasError } = await supabase
-        .from("profile_aliases")
+      // FIX: Cast .from() as any to allow .insert()
+      const { error: aliasError } = await (supabase.from("profile_aliases") as any)
         .insert(aliasPayload);
         
       if (aliasError) throw aliasError;
@@ -142,8 +139,8 @@ export async function updateUser(userId: string, data: UserData) {
       company_id: resolvedCompanyId,
     };
 
-    const { error: profileError } = await supabase
-      .from("profiles")
+    // FIX: Cast .from() as any to allow .update()
+    const { error: profileError } = await (supabase.from("profiles") as any)
       .update(profileUpdate)
       .eq("id", userId);
 
@@ -155,8 +152,7 @@ export async function updateUser(userId: string, data: UserData) {
     });
 
     // 3. Sync Aliases
-    await supabase
-      .from("profile_aliases")
+    await (supabase.from("profile_aliases") as any)
       .delete()
       .eq("profile_id", userId);
 
@@ -167,8 +163,8 @@ export async function updateUser(userId: string, data: UserData) {
         is_primary: a.is_primary,
       }));
 
-      const { error: insertError } = await supabase
-        .from("profile_aliases")
+      // FIX: Cast .from() as any to allow .insert()
+      const { error: insertError } = await (supabase.from("profile_aliases") as any)
         .insert(aliasPayload);
 
       if (insertError) throw insertError;
