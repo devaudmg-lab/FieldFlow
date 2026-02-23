@@ -16,10 +16,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { Database } from "@/types/database";
 
 interface Props {
   initialJobs: any[];
 }
+
+type ChecklistUpdate = Database["public"]["Tables"]["checklist_items"]["Update"];
 
 export default function JobManagementTable({ initialJobs }: Props) {
   const [jobs, setJobs] = useState(initialJobs);
@@ -140,34 +143,42 @@ export default function JobManagementTable({ initialJobs }: Props) {
     setIsDeletingBulk(false);
   };
 
-  const toggleItem = async (
-    jobId: string,
-    itemId: string,
-    currentState: boolean,
-  ) => {
-    setIsUpdating(itemId);
-    const { error } = await supabase
-      .from("checklist_items")
-      .update({ is_completed: !currentState })
-      .eq("id", itemId);
-    if (!error) {
-      setJobs((prev) =>
-        prev.map((job) =>
-          job.id === jobId
-            ? {
-                ...job,
-                checklist_items: job.checklist_items.map((item: any) =>
-                  item.id === itemId
-                    ? { ...item, is_completed: !currentState }
-                    : item,
-                ),
-              }
-            : job,
-        ),
-      );
-    }
-    setIsUpdating(null);
-  };
+const toggleItem = async (
+  jobId: string,
+  itemId: string,
+  currentState: boolean,
+) => {
+  setIsUpdating(itemId);
+
+  // 1. Prepare the typed payload
+
+
+  // 2. Perform the update with a cast if necessary
+const { error } = await (supabase
+    .from("checklist_items") as any) // Force the table selection to pass
+    .update({ 
+      is_completed: !currentState 
+    })
+    .eq("id", itemId);
+
+  if (!error) {
+    setJobs((prev) =>
+      prev.map((job) =>
+        job.id === jobId
+          ? {
+              ...job,
+              checklist_items: job.checklist_items.map((item: any) =>
+                item.id === itemId
+                  ? { ...item, is_completed: !currentState }
+                  : item,
+              ),
+            }
+          : job,
+      ),
+    );
+  }
+  setIsUpdating(null);
+};
 
   return (
     <div className="space-y-4">

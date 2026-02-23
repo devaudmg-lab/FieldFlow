@@ -3,10 +3,12 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { Database } from "@/types/database";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // --- Types ---
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-type RoleType = Database['public']['Tables']['profiles']['Row']['roles'][number];
+type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
+type RoleType = Database["public"]["Tables"]["profiles"]["Row"]["roles"][number];
+type AliasInsert = Database["public"]["Tables"]["profile_aliases"]["Insert"];
 
 interface AliasInput {
   name: string;
@@ -14,8 +16,8 @@ interface AliasInput {
 }
 
 interface CompanyData {
-  id?: string | null;   // Provided when selecting existing
-  name?: string | null; // Provided when creating new
+  id?: string | null;   
+  name?: string | null; 
 }
 
 interface UserData {
@@ -30,15 +32,14 @@ interface UserData {
 
 /**
  * Ensures a company exists and returns its ID.
- * Uses upsert to prevent race-condition duplicates on the name.
+ * Explicitly typing the supabase client here prevents 'never' errors.
  */
-async function resolveCompanyId(supabase: any, companyData: CompanyData): Promise<string | null> {
-  // Scenario A: Linking to an existing record via ID
-  if (companyData.id) {
-    return companyData.id;
-  }
+async function resolveCompanyId(
+  supabase: SupabaseClient<Database>, 
+  companyData: CompanyData
+): Promise<string | null> {
+  if (companyData.id) return companyData.id;
 
-  // Scenario B: Creating a new company entry via Name
   if (companyData.name) {
     const { data, error } = await supabase
       .from("companies")
@@ -50,7 +51,10 @@ async function resolveCompanyId(supabase: any, companyData: CompanyData): Promis
       .single();
 
     if (error) throw new Error(`Company Resolution Error: ${error.message}`);
-    return data.id;
+    
+    // Double cast to handle the .single() inference bug
+    const resolved = data as unknown as { id: string };
+    return resolved.id;
   }
 
   return null;
@@ -58,22 +62,19 @@ async function resolveCompanyId(supabase: any, companyData: CompanyData): Promis
 
 // --- Main Actions ---
 
-/**
- * Creates a user in Auth, resolves their company, updates profile, and adds aliases.
- */
 export async function createNewUser(
   data: UserData & { email: string; password: string },
 ) {
-  const supabase = await createAdminClient();
+  // THE FIX: Explicitly cast the admin client to SupabaseClient<Database>
+  const supabase = (await createAdminClient()) as SupabaseClient<Database>;
   
   try {
-    // 1. Determine Company Link (Only if "agent" role is present)
     let resolvedCompanyId: string | null = null;
     if (data.roles.includes("agent") && data.companyData) {
       resolvedCompanyId = await resolveCompanyId(supabase, data.companyData);
     }
 
-    // 2. Create User in Supabase Auth
+    // 1. Create User in Auth
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: data.email,
       password: data.password,
@@ -84,23 +85,25 @@ export async function createNewUser(
     if (authError) throw authError;
     const userId = authData.user.id;
 
-    // 3. Update the Profile record
-    // We use .update because a DB trigger usually creates the initial row on Auth signup
+    // 2. Update the Profile record
+    const profileUpdate: ProfileUpdate = {
+      username: data.username,
+      roles: data.roles,
+      is_active: true,
+      company_id: resolvedCompanyId,
+    };
+
+    // Because 'supabase' is now typed, .update() will not expect 'never'
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({
-        username: data.username,
-        roles: data.roles,
-        is_active: true,
-        company_id: resolvedCompanyId,
-      })
+      .update(profileUpdate)
       .eq("id", userId);
 
     if (profileError) throw profileError;
 
-    // 4. Batch Insert Aliases
+    // 3. Batch Insert Aliases
     if (data.aliases.length > 0) {
-      const aliasPayload = data.aliases.map((alias) => ({
+      const aliasPayload: AliasInsert[] = data.aliases.map((alias) => ({
         profile_id: userId,
         alias_name: alias.name,
         is_primary: alias.is_primary,
@@ -122,53 +125,52 @@ export async function createNewUser(
   }
 }
 
-/**
- * Updates an existing user and refreshes their company and alias associations.
- */
 export async function updateUser(userId: string, data: UserData) {
-  const supabase = await createAdminClient();
+  const supabase = (await createAdminClient()) as SupabaseClient<Database>;
 
   try {
-    // 1. Resolve Company ID
     let resolvedCompanyId: string | null = null;
     if (data.roles.includes("agent") && data.companyData) {
       resolvedCompanyId = await resolveCompanyId(supabase, data.companyData);
     }
 
-    // 2. Update Profile Table
+    // 1. Update Profile Table
+    const profileUpdate: ProfileUpdate = {
+      username: data.username,
+      roles: data.roles,
+      is_active: data.is_active,
+      company_id: resolvedCompanyId,
+    };
+
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({
-        username: data.username,
-        roles: data.roles,
-        is_active: data.is_active,
-        company_id: resolvedCompanyId,
-      })
+      .update(profileUpdate)
       .eq("id", userId);
 
     if (profileError) throw profileError;
 
-    // 3. Sync Auth Metadata
+    // 2. Sync Auth Metadata
     await supabase.auth.admin.updateUserById(userId, {
       user_metadata: { username: data.username },
     });
 
-    // 4. Sync Aliases (Delete existing and re-insert new set)
+    // 3. Sync Aliases
     await supabase
       .from("profile_aliases")
       .delete()
       .eq("profile_id", userId);
 
     if (data.aliases.length > 0) {
+      const aliasPayload: AliasInsert[] = data.aliases.map((a) => ({
+        profile_id: userId,
+        alias_name: a.name,
+        is_primary: a.is_primary,
+      }));
+
       const { error: insertError } = await supabase
         .from("profile_aliases")
-        .insert(
-          data.aliases.map((a) => ({
-            profile_id: userId,
-            alias_name: a.name,
-            is_primary: a.is_primary,
-          })),
-        );
+        .insert(aliasPayload);
+
       if (insertError) throw insertError;
     }
 
@@ -181,12 +183,8 @@ export async function updateUser(userId: string, data: UserData) {
   }
 }
 
-/**
- * Deletes a user from Auth (cascading deletes usually handle profiles/aliases)
- */
 export async function deleteUser(userId: string) {
   const supabase = await createAdminClient();
-  
   const { error } = await supabase.auth.admin.deleteUser(userId);
   
   if (error) {
