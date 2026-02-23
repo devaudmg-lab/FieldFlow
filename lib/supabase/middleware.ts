@@ -45,9 +45,15 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    const roles: string[] = profile?.roles || [];
+    /**
+     * THE FIX:
+     * We cast to 'unknown' first to break the 'never' or 'null' type inference.
+     * This tells TypeScript: "I know what I'm doing, treat this as the Profile Row type."
+     */
+    const profileRow = profile as unknown as Database["public"]["Tables"]["profiles"]["Row"];
+    const roles: string[] = profileRow?.roles || [];
 
-    // 2. AFTER LOGIN REDIRECTION
+    // 2. AFTER LOGIN REDIRECTION (Auto-redirect from /login if already authenticated)
     if (pathname === "/login" || pathname === "/") {
       if (roles.includes("admin")) {
         return NextResponse.redirect(new URL("/admin", request.url));
@@ -63,7 +69,8 @@ export async function updateSession(request: NextRequest) {
     // Admin page protection: Must have 'admin' in roles array
     if (pathname.startsWith("/admin") && !roles.includes("admin")) {
       // Redirect to worker if they have any other valid role, otherwise login
-      return roles.length > 0
+      const hasOtherRole = roles.some((r) => ["assessor", "worker", "agent"].includes(r));
+      return hasOtherRole
         ? NextResponse.redirect(new URL("/worker", request.url))
         : NextResponse.redirect(new URL("/login", request.url));
     }

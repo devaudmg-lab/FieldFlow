@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server"; // Ensure this path is correct for your server client
 import { redirect } from "next/navigation";
 import WorkerDashboard from "@/components/worker/WorkerDashboard";
+import { Database } from "@/types/database";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default async function WorkerPage() {
   const supabase = await createClient();
@@ -19,13 +22,13 @@ export default async function WorkerPage() {
   }
 
   // 2. Profile table se Role fetch karein
-  const { data: profile, error: profileError } = await supabase
+  const { data: profileData, error: profileError } = await supabase
     .from("profiles")
     .select("roles")
     .eq("id", user.id)
     .single();
 
-  console.log("Database Response:", { profile, profileError });
+const profile = profileData as unknown as ProfileRow;
 
   // Agar profile setup nahi hai toh error dikhao
   if (profileError || !profile) {

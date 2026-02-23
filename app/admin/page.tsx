@@ -12,8 +12,17 @@ import {
   Zap,
   Droplets,
   Sun,
-  MapPin,
 } from "lucide-react";
+import { Database } from "@/types/database";
+
+
+type JobWithRelations = Database["public"]["Tables"]["jobs"]["Row"] & {
+  assessor: { username: string } | null;
+  plumber: { username: string } | null;
+  electrician: { username: string } | null;
+  agent: { username: string } | null;
+  checklist_items: any[];
+};
 
 export default function AdminDashboard() {
   const supabase = createClient();
@@ -62,8 +71,10 @@ export default function AdminDashboard() {
           if (error) throw error;
 
           if (data && data.length > 0) {
+            
             // Data ko Map mein store karein (ID as Key)
-            data.forEach((job) => allJobsMap.set(job.id, job));
+            const typedData = data as unknown as JobWithRelations[];
+            typedData.forEach((job) => allJobsMap.set(job.id, job));
 
             console.log(
               `Fetched ${from} to ${to}. Current total: ${allJobsMap.size}`,

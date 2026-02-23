@@ -3,7 +3,7 @@
 import React from 'react';
 import { 
   User, Mail, Shield, Hash, 
-  MapPin, LogOut, Key, CheckCircle 
+  CheckCircle 
 } from 'lucide-react';
 
 export default function WorkerProfileUI({ profile, email }: { profile: any, email?: string }) {

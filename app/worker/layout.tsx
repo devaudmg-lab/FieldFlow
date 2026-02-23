@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SignOutButton from "@/components/auth/SignOutButton"; // Adjust path as needed
+import { Database } from "@/types/database";
+
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default async function WorkerLayout({
   children,
@@ -28,11 +31,14 @@ export default async function WorkerLayout({
   }
 
   // 2. Profile details
-  const { data: profile } = await supabase
+const { data: profileData } = await supabase
     .from("profiles")
     .select("username, roles")
     .eq("id", user.id)
     .single();
+
+    const profile = profileData as unknown as ProfileRow;
+    
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -78,9 +84,9 @@ export default async function WorkerLayout({
                 {profile?.username || "Worker"}
               </p>
               <p className="text-[9px] text-slate-500 font-black uppercase truncate">
-                {Array.isArray(profile?.role)
-                  ? profile.role.join(" & ")
-                  : profile?.role}
+                {Array.isArray(profile?.roles)
+                  ? profile.roles.join(" & ")
+                  : profile?.roles}
               </p>
             </div>
           </div>

@@ -4,6 +4,10 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Lock, User, Loader2, ShieldCheck } from "lucide-react";
+import { Database } from "@/types/database";
+
+// Extract the Row type for cleaner code
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -30,56 +34,56 @@ export default function LoginPage() {
         });
 
       if (authError) throw authError;
-
-      // Agar auth successful hai, toh loading true hi rehne denge
-      // Taaki errorMsg flash na ho
+      if (!authData.user) throw new Error("Authentication failed");
 
       // 2. Profile Fetching
-      const { data: profile, error: profileError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("roles")
         .eq("id", authData.user.id)
         .single();
 
-      if (profileError || !profile) {
+      if (profileError || !profileData) {
         throw new Error("Profile not found. Contact administrator.");
       }
 
-      // 3. Smart Redirect
-      const roles = Array.isArray(profile.roles)
-        ? profile.roles
-        : [profile.roles];
-      const normalizedRoles = roles.map((r: string) => r.toLowerCase());
+      /**
+       * THE FIX:
+       * Use 'as unknown as ProfileRow' to bypass the "neither type sufficiently overlaps" error.
+       */
+      const profile = profileData as unknown as ProfileRow;
 
-      // Yahan redirect se pehle router.refresh() ki zarurat hai session sync ke liye
+      // 3. Smart Redirect
+      const roles = Array.isArray(profile.roles) ? profile.roles : [];
+      const normalizedRoles = roles.map((r) => r.toLowerCase());
+
+      // Refresh session sync
       router.refresh();
 
       if (normalizedRoles.includes("admin")) {
         window.location.href = "/admin";
-        return; // <--- Critical: Yahan se function exit kar jayein
+        return;
       }
 
-      if (
-        normalizedRoles.some((r: string) =>
-          ["assessor", "agent", "worker"].includes(r),
-        )
-      ) {
+      const isWorkerRole = normalizedRoles.some((r) =>
+        ["assessor", "agent", "worker"].includes(r),
+      );
+
+      if (isWorkerRole) {
         window.location.href = "/worker";
-        return; // <--- Critical
+        return;
       }
 
       throw new Error("Unauthorized role.");
     } catch (err: any) {
-      // Sirf actual error ke case mein hi message dikhayenge
       console.error("Login error:", err);
       setErrorMsg(err.message || "Invalid credentials.");
-      setLoading(false); // Stop loading ONLY on error
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-      {/* ... (Baki UI same rahega) ... */}
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl text-white mb-4 shadow-xl">
