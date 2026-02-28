@@ -178,7 +178,7 @@ export default function AdminStatsTiles({ jobs }: AdminStatsTilesProps) {
                               Impacted Jobs:
                             </p>
                             <div className="flex flex-wrap gap-1.5">
-                              {jobIds.map((id) => (
+                              {(jobIds as string[]).map((id) => (
                                 <span
                                   key={id}
                                   className="text-[9px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-lg border border-slate-200"
