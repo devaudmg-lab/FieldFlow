@@ -68,7 +68,7 @@ export default function AdminStatisticsPage() {
   };
   useEffect(() => {
     fetchAllJobsForStats();
-  });
+  },[]);
 
   // Filter based on search query, focusing ONLY on Assessor names
   const filteredJobs = jobs.filter((job) => {

@@ -160,7 +160,7 @@ export default function AdminStatsTiles({ jobs }: AdminStatsTilesProps) {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className="bg-red-500 text-white text-sm font-black px-4 py-2 rounded-lg">
-                            {jobIds.length}
+                            {(jobIds as string[]).length}
                           </span>
                           {isExpanded ? (
                             <ChevronUp size={16} className="text-slate-400" />

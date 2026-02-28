@@ -95,7 +95,7 @@ export default function AdminDashboard() {
     return () => {
       isMounted = false;
     }; // Cleanup function
-  });
+  },[]);
 
   const totalJobs = jobs.length;
   const pendingJobs = jobs.filter((j) => j.status === "pending").length;
