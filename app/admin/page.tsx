@@ -31,7 +31,6 @@ export default function AdminDashboard() {
     "AC",
   );
   const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // 2. Fetch jobs (Simplified to match your schema's 'username' field)
   useEffect(() => {
@@ -39,7 +38,6 @@ export default function AdminDashboard() {
 
     // AdminDashboard.tsx ke andar fetchJobs function
     const fetchJobs = async () => {
-      setLoading(true);
       const allJobsMap = new Map();
       let from = 0;
       const step = 1000;
@@ -87,8 +85,9 @@ export default function AdminDashboard() {
       } catch (err) {
         console.error(">>> [FETCH ERROR]:", err);
       } finally {
-        setJobs(Array.from(allJobsMap.values()));
-        setLoading(false);
+        if (isMounted) {
+          setJobs(Array.from(allJobsMap.values()));
+        }
       }
     };
 
