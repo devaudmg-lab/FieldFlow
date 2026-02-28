@@ -7,7 +7,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 // --- Types ---
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
-type RoleType = Database["public"]["Tables"]["profiles"]["Row"]["roles"][number];
+type RoleType =
+  Database["public"]["Tables"]["profiles"]["Row"]["roles"][number];
 type AliasInsert = Database["public"]["Tables"]["profile_aliases"]["Insert"];
 
 interface AliasInput {
@@ -16,8 +17,8 @@ interface AliasInput {
 }
 
 interface CompanyData {
-  id?: string | null;   
-  name?: string | null; 
+  id?: string | null;
+  name?: string | null;
 }
 
 interface UserData {
@@ -35,23 +36,20 @@ interface UserData {
  * Casts the table reference to bypass 'never' inference.
  */
 async function resolveCompanyId(
-  supabase: SupabaseClient<Database>, 
-  companyData: CompanyData
+  supabase: SupabaseClient<Database>,
+  companyData: CompanyData,
 ): Promise<string | null> {
   if (companyData.id) return companyData.id;
 
   if (companyData.name) {
     // FIX: Cast .from() as any to allow .upsert()
     const { data, error } = await (supabase.from("companies") as any)
-      .upsert(
-        { name: companyData.name.trim() }, 
-        { onConflict: "name" }
-      )
+      .upsert({ name: companyData.name.trim() }, { onConflict: "name" })
       .select("id")
       .single();
 
     if (error) throw new Error(`Company Resolution Error: ${error.message}`);
-    
+
     const resolved = data as unknown as { id: string };
     return resolved.id;
   }
@@ -65,7 +63,7 @@ export async function createNewUser(
   data: UserData & { email: string; password: string },
 ) {
   const supabase = (await createAdminClient()) as SupabaseClient<Database>;
-  
+
   try {
     let resolvedCompanyId: string | null = null;
     if (data.roles.includes("agent") && data.companyData) {
@@ -73,12 +71,13 @@ export async function createNewUser(
     }
 
     // 1. Create User in Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: data.email,
-      password: data.password,
-      email_confirm: true,
-      user_metadata: { username: data.username },
-    });
+    const { data: authData, error: authError } =
+      await supabase.auth.admin.createUser({
+        email: data.email,
+        password: data.password,
+        email_confirm: true,
+        user_metadata: { username: data.username },
+      });
 
     if (authError) throw authError;
     const userId = authData.user.id;
@@ -107,15 +106,15 @@ export async function createNewUser(
       }));
 
       // FIX: Cast .from() as any to allow .insert()
-      const { error: aliasError } = await (supabase.from("profile_aliases") as any)
-        .insert(aliasPayload);
-        
+      const { error: aliasError } = await (
+        supabase.from("profile_aliases") as any
+      ).insert(aliasPayload);
+
       if (aliasError) throw aliasError;
     }
 
     revalidatePath("/admin/users");
     return { success: true };
-
   } catch (error: any) {
     console.error("Critical Error in createNewUser:", error.message);
     return { error: error.message };
@@ -164,15 +163,15 @@ export async function updateUser(userId: string, data: UserData) {
       }));
 
       // FIX: Cast .from() as any to allow .insert()
-      const { error: insertError } = await (supabase.from("profile_aliases") as any)
-        .insert(aliasPayload);
+      const { error: insertError } = await (
+        supabase.from("profile_aliases") as any
+      ).insert(aliasPayload);
 
       if (insertError) throw insertError;
     }
 
     revalidatePath("/admin/users");
     return { success: true };
-
   } catch (error: any) {
     console.error("Critical Error in updateUser:", error.message);
     return { error: error.message };
@@ -182,12 +181,12 @@ export async function updateUser(userId: string, data: UserData) {
 export async function deleteUser(userId: string) {
   const supabase = await createAdminClient();
   const { error } = await supabase.auth.admin.deleteUser(userId);
-  
+
   if (error) {
     console.error("Delete Error:", error.message);
     return { error: error.message };
   }
-  
+
   revalidatePath("/admin/users");
   return { success: true };
 }

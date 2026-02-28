@@ -14,7 +14,6 @@ export default async function WorkerPage() {
     error: authError,
   } = await supabase.auth.getUser();
 
-  console.log(user);
 
   // Agar login nahi hai, toh wapas bhej do
   if (authError || !user) {

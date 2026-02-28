@@ -161,7 +161,7 @@ export default function UserCreationForm() {
                 name="email"
                 type="email"
                 required
-                placeholder="email@company.com"
+                placeholder="email@fieldflow.com"
                 className="w-full pl-10 p-2.5 border rounded-lg text-black bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
               />
             </div>

@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import SignOutButton from "@/components/auth/SignOutButton";
 
@@ -25,6 +26,7 @@ export default function AdminLayout({
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "User Management", href: "/admin/users", icon: Users },
+    { name: "Statistics", href: "/admin/statistics", icon: BarChart3 },
   ];
 
   const NavContent = () => (

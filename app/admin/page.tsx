@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Database } from "@/types/database";
 
-
 type JobWithRelations = Database["public"]["Tables"]["jobs"]["Row"] & {
   assessor: { username: string } | null;
   plumber: { username: string } | null;
@@ -71,14 +70,9 @@ export default function AdminDashboard() {
           if (error) throw error;
 
           if (data && data.length > 0) {
-            
             // Data ko Map mein store karein (ID as Key)
             const typedData = data as unknown as JobWithRelations[];
             typedData.forEach((job) => allJobsMap.set(job.id, job));
-
-            console.log(
-              `Fetched ${from} to ${to}. Current total: ${allJobsMap.size}`,
-            );
 
             // Agar humne total count touch kar liya ya data khatam ho gaya
             if (allJobsMap.size >= (count || 0) || data.length < step) {

@@ -75,9 +75,17 @@ export default function LoginPage() {
       }
 
       throw new Error("Unauthorized role.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      setErrorMsg(err.message || "Invalid credentials.");
+
+      if (err instanceof Error) {
+        // Yahan TypeScript ko pata hai ki 'err' ke paas '.message' property hai
+        setErrorMsg(err.message);
+      } else {
+        // Agar error koi ajeeb cheez hui (jaise sirf string)
+        setErrorMsg("An unexpected error occurred.");
+      }
+
       setLoading(false);
     }
   };
