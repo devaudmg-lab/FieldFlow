@@ -96,7 +96,7 @@ export default function AdminDashboard() {
     return () => {
       isMounted = false;
     }; // Cleanup function
-  }, []);
+  });
 
   const totalJobs = jobs.length;
   const pendingJobs = jobs.filter((j) => j.status === "pending").length;
@@ -243,7 +243,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-slate-200 bg-white shadow-sm min-w-[120px]">
+    <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-slate-200 bg-white shadow-sm min-w-30">
       <div className={`p-2.5 rounded-lg ${color}`}>{icon}</div>
       <div>
         <p className="text-[10px] uppercase font-black text-slate-400 leading-none mb-1">

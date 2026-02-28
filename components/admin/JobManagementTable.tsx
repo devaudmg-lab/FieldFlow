@@ -345,7 +345,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                            <span className="text-xs text-slate-600 font-semibold truncate max-w-[80px]">
+                            <span className="text-xs text-slate-600 font-semibold truncate max-w-20">
                               {job.assessor?.username || (
                                 <span className="text-slate-300 font-normal italic">
                                   Not Provided
@@ -358,7 +358,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                            <span className="text-xs text-slate-600 font-semibold truncate max-w-[80px]">
+                            <span className="text-xs text-slate-600 font-semibold truncate max-w-20">
                               {job.plumber?.username || (
                                 <span className="text-slate-300 font-normal italic">
                                   Not Provided
@@ -371,7 +371,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
-                            <span className="text-xs text-slate-600 font-semibold truncate max-w-[80px]">
+                            <span className="text-xs text-slate-600 font-semibold truncate max-w-20">
                               {job.electrician?.username || (
                                 <span className="text-slate-300 font-normal italic">
                                   Not Provided
@@ -384,7 +384,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
-                            <span className="text-xs text-slate-600 font-semibold truncate max-w-[80px]">
+                            <span className="text-xs text-slate-600 font-semibold truncate max-w-20">
                               {job.agent?.username || (
                                 <span className="text-slate-300 font-normal italic">
                                   Not Provided

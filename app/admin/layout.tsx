@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  History,
   Users,
   ShieldCheck,
   Menu,
@@ -140,7 +139,7 @@ export default function AdminLayout({
         </header>
 
         {/* Content Body */}
-        <main className="p-4 lg:p-8 max-w-[1600px] mx-auto w-full">
+        <main className="p-4 lg:p-8 max-w-400 mx-auto w-full">
           {children}
         </main>
       </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { 
   User, Mail, Shield, Hash, 
   CheckCircle 
@@ -15,8 +14,8 @@ export default function WorkerProfileUI({ profile, email }: { profile: any, emai
       </header>
 
       {/* Profile Card */}
-      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-slate-900 to-blue-900 relative">
+      <div className="bg-white rounded-4xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="h-32 bg-linear-to-r from-slate-900 to-blue-900 relative">
             <div className="absolute -bottom-10 left-8">
                 <div className="w-24 h-24 bg-white rounded-3xl p-1 shadow-xl">
                     <div className="w-full h-full bg-blue-100 rounded-[1.25rem] flex items-center justify-center text-blue-600">

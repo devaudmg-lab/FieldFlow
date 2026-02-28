@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import AdminStatsTiles from "@/components/admin/AdminStatsTiles";
-import { BarChart3, RefreshCcw, Search, Users } from "lucide-react";
+import { RefreshCcw, Search, Users } from "lucide-react";
 
 export default function AdminStatisticsPage() {
   const supabase = createClient();
@@ -68,7 +68,7 @@ export default function AdminStatisticsPage() {
   };
   useEffect(() => {
     fetchAllJobsForStats();
-  }, []);
+  });
 
   // Filter based on search query, focusing ONLY on Assessor names
   const filteredJobs = jobs.filter((job) => {

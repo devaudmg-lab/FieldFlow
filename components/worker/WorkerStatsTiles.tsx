@@ -125,7 +125,7 @@ function TaskAccordion({ title, items }: { title: string; items: any[] }) {
 
   return (
     <div
-      className={`bg-white rounded-[2rem] border transition-all duration-300 flex flex-col overflow-hidden ${
+      className={`bg-white rounded-4xl border transition-all duration-300 flex flex-col overflow-hidden ${
         isOpen ? "border-slate-900 shadow-md" : "border-slate-200 shadow-sm"
       }`}
     >
@@ -189,7 +189,7 @@ function TaskAccordion({ title, items }: { title: string; items: any[] }) {
 function StatTile({ label, count, icon, color }: any) {
   return (
     <div
-      className={`${color} border-t-4 p-6 rounded-[2rem] shadow-sm flex justify-between items-start`}
+      className={`${color} border-t-4 p-6 rounded-4xl shadow-sm flex justify-between items-start`}
     >
       <div>
         <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-70">

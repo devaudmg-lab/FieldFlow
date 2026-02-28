@@ -89,7 +89,7 @@ export default function BulkUploadZone({ jobCategory }: BulkUploadProps) {
             <>
               <UploadCloud className="text-slate-400 mb-3" size={40} />
               <p className="text-sm text-slate-600 font-medium">Click to upload <span className="text-blue-600 font-bold">{jobCategory}</span> Excel</p>
-              <p className="text-[11px] text-slate-400 mt-2 leading-relaxed max-w-[200px]">
+              <p className="text-[11px] text-slate-400 mt-2 leading-relaxed max-w-50">
                 File will be tagged as <b>{jobCategory}</b>
               </p>
             </>

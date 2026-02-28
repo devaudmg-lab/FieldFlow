@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import * as XLSX from "xlsx"; // 1. Import XLSX
 import {
   MapPin,
   Phone,
-  Calendar,
   ClipboardList,
   Briefcase,
   CheckCircleIcon,

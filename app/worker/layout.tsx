@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import {
   Briefcase,
   UserCircle,
-  Settings,
   Bell,
   CheckCircle,
 } from "lucide-react";
@@ -53,7 +52,7 @@ const { data: profileData } = await supabase
               <h2 className="font-black text-xl tracking-tighter uppercase leading-none">
                 Field<span className="text-blue-500">Flow</span>
               </h2>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1 text-blue-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest mt-1 text-blue-400">
                 Worker Portal
               </p>
             </div>
