@@ -23,7 +23,7 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg("");
 
-    const email = `${username}@fieldflow.com`;
+    const email = `${username}@aurum.com`;
 
     try {
       // 1. Supabase Auth Sign In

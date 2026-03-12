@@ -92,6 +92,7 @@ export default function UserCreationForm() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
+    // Basic Validations
     if (selectedRoles.length === 0)
       return alert("Please select at least one role.");
     if (aliases.some((a) => !a.name.trim()))
@@ -104,11 +105,20 @@ export default function UserCreationForm() {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
 
+    // --- NEW LOGIC START ---
+    // Hum 'email' ki jagah 'email_username' fetch karenge jo admin ne dala hai
+    // Agar admin ne galti se @aurum.com khud bhi likh diya ho, toh double na ho jaye
+    const usernamePart = (formData.get("email_username") as string).split(
+      "@",
+    )[0];
+    const finalEmail = `${usernamePart.trim()}@aurum.com`;
+    // --- NEW LOGIC END ---
+
     const result = await createNewUser({
-      email: formData.get("email") as string,
+      email: finalEmail, // Ab yaha final combined email jayega
       password: formData.get("password") as string,
       username: formData.get("username") as string,
-      roles: selectedRoles as any, // Cast to match strict role types
+      roles: selectedRoles as any,
       is_active: true,
       aliases: aliases,
       companyData: isAgentSelected
@@ -130,7 +140,7 @@ export default function UserCreationForm() {
       setCompanyInput("");
       setLoading(false);
 
-      // Refresh company list in case a new one was created
+      // Refresh company list
       const data = await getCompanies();
       setExistingCompanies(data);
     }
@@ -147,24 +157,35 @@ export default function UserCreationForm() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">
               Email Address
             </label>
-            <div className="relative">
+            <div className="relative flex items-center">
+              {/* Icon */}
               <Mail
-                className="absolute left-3 top-3 text-slate-400"
+                className="absolute left-3 text-slate-400 pointer-events-none"
                 size={16}
               />
+
+              {/* Username Input */}
               <input
-                name="email"
-                type="email"
+                name="email_username"
+                type="text"
                 required
-                placeholder="email@fieldflow.com"
-                className="w-full pl-10 p-2.5 border rounded-lg text-black bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                placeholder="username"
+                className="w-full pl-10 pr-[100px] p-2.5 border rounded-lg text-black bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
               />
+
+              {/* Fixed Domain Label */}
+              <span className="absolute right-3 text-slate-500 font-medium select-none bg-slate-100 px-2 py-1 rounded border">
+                @aurum.com
+              </span>
             </div>
+            <p className="text-xs text-slate-500 italic">
+              User will be created as username@aurum.com
+            </p>
           </div>
 
           <div className="space-y-1.5">

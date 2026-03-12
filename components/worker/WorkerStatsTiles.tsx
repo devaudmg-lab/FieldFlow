@@ -139,7 +139,7 @@ function TaskAccordion({ title, items }: { title: string; items: any[] }) {
             {title}
           </h3>
           <p className="text-sm font-bold text-red-500 mt-1">
-            {items.length} Jobs Pending
+            {items.length} checklist items Pending
           </p>
         </div>
         <div
