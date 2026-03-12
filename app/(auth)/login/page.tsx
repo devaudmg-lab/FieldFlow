@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Lock, User, Loader2, ShieldCheck } from "lucide-react";
+import { Lock, User, Loader2, ShieldCheck, EyeOff, Eye } from "lucide-react";
 import { Database } from "@/types/database";
 
 // Extract the Row type for cleaner code
@@ -12,6 +12,7 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -143,13 +144,22 @@ export default function LoginPage() {
                   size={18}
                 />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Dynamic type change
                   required
-                  className="w-full text-slate-900 pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all font-semibold placeholder:text-slate-300"
+                  className="w-full text-slate-900 pl-12 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 outline-none transition-all font-semibold placeholder:text-slate-300"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+
+                {/* Eye Icon Toggle Button */}
+                <button
+                  type="button" // Important: Taaki form submit na ho jaye click karne par
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

@@ -13,6 +13,8 @@ import {
   Mail,
   User as UserIcon,
   Building2,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 
 const AVAILABLE_ROLES = ["admin", "assessor", "worker", "agent"] as const;
@@ -24,6 +26,7 @@ interface AliasInput {
 
 export default function UserCreationForm() {
   const [loading, setLoading] = useState(false);
+  const [showLoginPass, setShowLoginPass] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<
     (typeof AVAILABLE_ROLES)[number][]
   >(["worker"]);
@@ -193,17 +196,28 @@ export default function UserCreationForm() {
               Login Password
             </label>
             <div className="relative">
+              {/* Key Icon */}
               <KeyRound
                 className="absolute left-3 top-3 text-slate-400"
                 size={16}
               />
+
               <input
                 name="password"
-                type="password"
+                type={showLoginPass ? "text" : "password"} // Toggle type
                 required
                 placeholder="••••••••"
-                className="w-full pl-10 p-2.5 border rounded-lg text-black bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                className="w-full pl-10 pr-10 p-2.5 border rounded-lg text-black bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none transition"
               />
+
+              {/* Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setShowLoginPass(!showLoginPass)}
+                className="absolute right-3 top-3 text-slate-400 hover:text-blue-500 transition-colors focus:outline-none"
+              >
+                {showLoginPass ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
         </div>
