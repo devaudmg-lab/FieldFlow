@@ -329,7 +329,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                             {job.customer_name}
                           </div>
                           <div className="text-[10px] text-slate-400 font-mono mt-1">
-                            REF: {job.id.split("-")[0]}
+                            REF: {job.actual_job_id.split("-")[0]}
                           </div>
                         </td>
                         <td className="px-6 py-4">

@@ -95,12 +95,24 @@ export default function AdminDashboard() {
     return () => {
       isMounted = false;
     }; // Cleanup function
-  },[]);
+  }, []);
 
+  // --- REAL-TIME CHECKLIST LOGIC FOR STATS ---
   const totalJobs = jobs.length;
-  const pendingJobs = jobs.filter((j) => j.status === "pending").length;
-  const completedJobs = jobs.filter((j) => j.status === "completed").length;
 
+  const completedJobs = jobs.filter((job) => {
+    const checklist = job.checklist_items || [];
+    const totalItems = checklist.length;
+    const completedItems = checklist.filter((i: any) => i.is_completed).length;
+
+    // Logic: Agar checklist khali hai (total === 0)
+    // YA saare items complete hain, toh job "Done" hai.
+    return (
+      totalItems === 0 || (totalItems > 0 && totalItems === completedItems)
+    );
+  }).length;
+
+  const pendingJobs = totalJobs - completedJobs;
   return (
     <div className="space-y-8 p-4 md:p-8 bg-slate-50/50 min-h-screen">
       {/* Header & Stats */}
