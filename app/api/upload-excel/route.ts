@@ -52,13 +52,44 @@ function formatExcelDate(excelDate: any): string | null {
 
 export async function POST(request: Request) {
   try {
-    const { data, job_category } = await request.json();
+    const { data: rawData, job_category } = await request.json();
     const skipValues = ["assessment only", "all good", "n/a", ""];
 
-    if (!data || !Array.isArray(data)) {
+    // Statuses to skip (Case-insensitive check ke liye lowercase mein rakha hai)
+    const statusesToExclude = [
+      "assessment only",
+      "cancelled",
+      "failed",
+      "passed",
+    ];
+
+    if (!rawData || !Array.isArray(rawData)) {
       return NextResponse.json(
         { error: "Invalid data format" },
         { status: 400 },
+      );
+    }
+
+    // Yahan hi data ko filter kar dein taaki aage ka saara logic sirf valid jobs par chale
+    const data = rawData.filter((row: any) => {
+      const statusValue = row["JOB PASSED/FAIL"]
+        ?.toString()
+        .trim()
+        .toLowerCase();
+      // Agar status exclude list mein hai, toh false return karke nikal dein
+      return !statusesToExclude.includes(statusValue);
+    });
+
+    console.log("this is the length of data = ", data.length);
+
+    // Agar filtering ke baad kuch bacha hi nahi
+    if (data.length === 0) {
+      return NextResponse.json(
+        {
+          message:
+            "No jobs were processed (all rows were skipped based on status).",
+        },
+        { status: 200 },
       );
     }
 
@@ -156,7 +187,7 @@ export async function POST(request: Request) {
         assigned_plumber_id: plumberId,
         assigned_elec_id: elecId,
         assigned_agent_id: agentId,
-        status: row["JOB PASSED/FAIL"] === "Passed" ? "completed" : "pending",
+        status: "pending",
         complete_date: formatExcelDate(row["COMPLETED DATE"]),
         customer_name: row["CUSTOMER NAME"] || "Unknown",
         customer_phone: row["PHONE"]?.toString() || "N/A",

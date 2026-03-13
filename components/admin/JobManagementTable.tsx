@@ -334,7 +334,7 @@ export default function JobManagementTable({ initialJobs }: Props) {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${job.phone_audit === "All Good" ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200"}`}
+                            className={`px-2 py-0.5 text-xs text-slate-900 uppercase`}
                           >
                             {job.phone_audit || "N/A"}
                           </span>
