@@ -76,8 +76,10 @@ export async function POST(request: Request) {
         ?.toString()
         .trim()
         .toLowerCase();
-      // Agar status exclude list mein hai, toh false return karke nikal dein
-      return !statusesToExclude.includes(statusValue);
+      const stateValue = row["STATE"]?.toString().trim().toUpperCase();
+
+      // "NSW" check aur statuses check ek saath
+      return !statusesToExclude.includes(statusValue) && stateValue !== "NSW";
     });
 
     console.log("this is the length of data = ", data.length);
